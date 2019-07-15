@@ -19,8 +19,7 @@ def arg_sort(distances, top_k):
 
 @nb.jit
 def weighted_euclidean(q, x, w, top_k):
-    distances = np.linalg.norm(
-        np.multiply(q - x,  w), axis=1)
+    distances = np.sum(np.multiply((q - x)**2, w), axis=1)
     return arg_sort(distances, top_k)
 
 

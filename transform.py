@@ -1,9 +1,18 @@
 import numpy as np
 
+
+def scale_mean(x, q, scalar):
+    mean = np.mean(x, axis=0, keepdims=True)
+    x -= mean
+    q -= mean
+    scale = np.max(np.abs(x)) / scalar
+    x /= scale
+    q /= scale
+    return x ,q
+
+
 def spherical_transform(x, q, w, U=np.pi):
-    max = np.max(np.abs(x))
-    x = x / max * U
-    q = q / max * U
+    x, q = scale_mean(x, q, scalar=U)
 
     x = np.hstack([np.cos(x), np.sin(x)])
     w = w[None, :]
@@ -30,14 +39,8 @@ def simple_lsh(x, q):
     return x_, q_
 
 
-def transform(x, q, w):
-
-    mean = np.mean(x, axis=0, keepdims=True)
-    x -= mean
-    q -= mean
-    scale = np.mean(np.abs(x))
-    x /= scale
-    q /= scale
+def transform(x, q, w, scalar=0.2):
+    x, q = scale_mean(x, q, scalar=scalar)
 
     x = np.hstack([x**2, x])
     q = np.hstack([
