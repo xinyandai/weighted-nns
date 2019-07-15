@@ -33,7 +33,7 @@ def simple_lsh(x, q):
 
     norms = np.linalg.norm(x, axis=1)
     m = np.max(norms)
-    x_[:, d] = m - norms
+    x_[:, d] = np.sqrt(m**2 - norms**2)
     q_[:, d] = 0.0
 
     return x_, q_

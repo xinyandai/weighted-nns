@@ -43,9 +43,11 @@ def composite():
     (x1, q1), (x2, q2) = transform(x, q, w)
     U1 = np.linalg.norm(x1[0, :])
     U2 = np.linalg.norm(x2[0, :])
+    qn1 = np.linalg.norm(q1, axis=1, keepdims=True)
+    qn2 = np.linalg.norm(q2, axis=1, keepdims=True)
     n1, d1 = x1.shape
     n2, d2 = x2.shape
-    for rate in [2,4,6,8,10]:
+    for rate in np.arange(2, 14):
         ks = 256
         k1 = int(ks / rate)
         k2 = ks - k1
@@ -57,12 +59,11 @@ def composite():
         qc1, qc2 = h1.hash(q1), h2.hash(q2)
         l1, l2 = _hamming_dist(qc1, xc1), \
                  _hamming_dist(qc2, xc2)
-        def estimate_similarity(u, l, k, alpha=1.0, shift=0.0):
-            return u * np.cos(np.pi * (alpha * (l / k) + shift))
-        similarity = estimate_similarity(U1, l1, k1,
-                                         alpha=0.9, shift=0.1) + \
-                     estimate_similarity(U2, l2, k2,
-                                         alpha=0.9, shift=0.1)
+
+        def estimate_similarity(u, l, qn, alpha=1.0, shift=0.05):
+            return u * qn * np.cos(np.pi * (alpha * l + shift))
+        similarity = estimate_similarity(U1, l1, qn1) + \
+                     estimate_similarity(U2, l2, qn2)
 
         test_recalls(np.argsort(-similarity), gt)
 
